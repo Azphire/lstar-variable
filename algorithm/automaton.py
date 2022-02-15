@@ -7,6 +7,16 @@ class Trans:
         self.operator = operator
         self.opt_number = opt_number
 
+    def __repr__(self):
+        result = {
+            "l": self.left,
+            "r": self.right,
+            "target": self.target,
+            "opt": self.operator,
+            "num": self.opt_number
+        }
+        return str(result)
+
 
 class Machine:
 
@@ -61,10 +71,10 @@ class Machine:
         return None
 
     def member_query(self, test_str):
+        if test_str == "":
+            return 0, 0
         curr_state = self.start
         n = 0
-        opt = ''
-        opt_num = 0
         for char in test_str:
             result = self.transfer(curr_state, char, n)
             if result:
@@ -84,6 +94,7 @@ class Machine:
         n = 0
         result = None
         for char in sentence:
-            curr_state, n, opt, opt_num = self.transfer(curr_state, char, n)
+            curr_state, next_n, opt, opt_num = self.transfer(curr_state, char, n)
             result = (n, opt, opt_num)
+            n = next_n
         return result

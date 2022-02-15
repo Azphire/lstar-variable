@@ -22,12 +22,10 @@ class Teacher:
         return self.machine.full_query(sentence)
 
     def find_ex_step(self, step, pre):
-        print("查找反例中")
         for char in self.alphabet:
             test_result = self.test_machine.member_query(pre + char)[0]
             real_result = self.machine.member_query(pre + char)[0]
             if test_result != real_result:
-                print("反例: " + pre + char)
                 return pre + char
             if step < lenMax:
                 next_str = self.find_ex_step(step + 1, pre + char)
@@ -38,13 +36,14 @@ class Teacher:
     # 返回是否等价，反例
     def eq_query(self, test_machine: Machine):
         self.test_machine = test_machine
+        print("查找反例中")
         example = self.find_ex_step(0, "")
         if example:
-            print("NOT EQUIVALENT! " + example)
+            print("不等价，反例： " + example)
             return False, example
 
         else:
-            print("EQUIVALENT")
+            print("等价")
             return True, None
 
 
@@ -54,12 +53,13 @@ class Student:
         self.teacher = Teacher(machine)
         self.obTable = ObservationTable(machine.alphabet)
         self.learning_machine = None
+        self.obTable.T = [[] for x in range(len(self.obTable.S))]
+        self.obTable.T[0].append(self.member_query(""))
 
     def row(self, sentence):
         result = []
         for e in self.obTable.E:
             result.append(self.member_query(sentence + e))
-        print(result)
         return result
 
     # 返回该句子的接受与否和参数值
@@ -74,38 +74,51 @@ class Student:
                         break
                     if s2 == len(self.obTable.S) - 1:
                         return False
-        print("is closed")
+        print("已闭合")
         return True
 
     def is_consistent(self):
         for s1 in self.obTable.S:
             for s2 in self.obTable.S:
-                if is_same_state(self.row(s1), self.row(s2)):
+                if is_same_state(self.row(s1), self.row(s2), True):
+                    if self.member_query(s1)[1] != self.member_query(s2)[1]:
+                        # 变量值不同，跳过不比较
+                        continue
                     for char in self.obTable.alphabet:
                         if not is_same_state(self.row(s1 + char), self.row(s2 + char)):
                             return False
-        print("is consistent")
+        print("已完备")
         return True
 
     def close(self):
         for s in self.obTable.S:
             for char in self.obTable.alphabet:
                 for s2 in range(len(self.obTable.S)):
-                    if is_same_state(self.row(s + char), self.row(self.obTable.S[s2])):
+                    if is_same_state(self.row(s + char), self.row(self.obTable.S[s2]), True):
                         break
                     if s2 == len(self.obTable.S) - 1:
                         self.obTable.S.append(s + char)
                         self.obTable.T.append([self.row(s + char)])
+                        print("添加S：", s + char)
 
     def consist(self):
+        print("完备观察表")
         for s in self.obTable.S:
             for s2 in self.obTable.S:
-                if is_same_state(self.row(s), self.row(s2)):
-                    print(self.row(s), " = ", self.row(s2))
+                if s == s2:
+                    continue
+                if is_same_state(self.row(s), self.row(s2), True):
+                    print(s, " = ", s2)
+                    if self.member_query(s)[1] != self.member_query(s2)[1]:
+                        # 变量值不同，跳过不比较
+                        continue
                     for char in self.obTable.alphabet:
                         for e in self.obTable.E:
                             if not is_same_state(self.row(s + char + e), self.row(s2 + char + e)):
+                                print(s + char + e, " != ", s2 + char + e)
+                                print(self.row(s + char + e), self.row(s2 + char + e))
                                 self.obTable.E.append(char + e)
+                                print("添加E：", char + e)
                                 for ind in range(len(self.obTable.S)):
                                     self.obTable.T[ind].append(self.member_query(self.obTable.S[ind] + char + e))
 
@@ -114,6 +127,12 @@ class Student:
         not_satisfied = True
 
         while not_satisfied:
+            print("S:")
+            print(self.obTable.S)
+            print("E:")
+            print(self.obTable.E)
+            print("T:")
+            print(self.obTable.T)
             not_satisfied = False
 
             if self.is_closed():
@@ -139,19 +158,23 @@ class Student:
         for i in range(1, total):
             new_state = True
             for j in range(i):
-                if is_same_state(self.row(self.obTable.S[i]), self.row(self.obTable.S[j])):
+                if is_same_state(self.row(self.obTable.S[i]), self.row(self.obTable.S[j]), True):
                     state_list.append(state_list[j])
                     new_state = False
+                    break
             if new_state:
                 state_list.append(counter)
                 counter = counter + 1
                 if self.member_query(self.obTable.S[i])[0] == 1:
-                    accepted.append(counter)
+                    accepted.append(counter - 1)
         return counter, state_list, accepted
 
     # 构造dfa
     def build_dfa(self):
         state_num, state_list, accepted = self.count_state()
+        print(self.obTable.S)
+        print("状态：")
+        print(state_list, accepted)
         dfa_states = []
         dfa_map = {}
         # 初始化dfa map
@@ -173,16 +196,17 @@ class Student:
                 n, opt, opt_num = self.teacher.full_query(sentence)
                 self.learning_machine.update_once(current_state, char, Trans(n, n, target_state, opt, opt_num))
 
-    def learn_dfa(self):
+    def learn(self):
         while True:
             self.close_and_consist()
             self.build_dfa()
             is_equal, example = self.teacher.eq_query(self.learning_machine)
+            print("构建结果：")
+            print("dfa:")
+            print(self.learning_machine.dfa)
+            print("accept:")
+            print(self.learning_machine.accepted)
             if is_equal:
-                print("dfa:")
-                print(self.learning_machine.dfa)
-                print("accept:")
-                print(self.learning_machine.accepted)
                 return
             else:
                 for x in range(len(example)):
@@ -190,3 +214,4 @@ class Student:
                         continue
                     self.obTable.S.append(example[x:])
                     self.obTable.T.append(self.row(example[x:]))
+                    print("添加S：", example[x:])
