@@ -14,3 +14,5 @@ class ObservationTable:
         self.S = ['']  # ['', 'a']
         self.E = ['']  # ['', 'a', 'ab', 'aa']
         self.T = []  #
+        for a in self.alphabet:
+            self.S.append(a)

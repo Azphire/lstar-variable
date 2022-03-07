@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from automaton import Machine, Trans
 from observationTable import ObservationTable, is_same_state
 varMax = 10
@@ -27,7 +29,7 @@ class Teacher:
             real_result = self.machine.member_query(pre + char)[0]
             if test_result != real_result:
                 return pre + char
-            if step < lenMax:
+            if step < lenMax - 1:
                 next_str = self.find_ex_step(step + 1, pre + char)
                 if next_str:
                     return next_str
@@ -55,6 +57,10 @@ class Student:
         self.learning_machine = None
         self.obTable.T = [[] for x in range(len(self.obTable.S))]
         self.obTable.T[0].append(self.member_query(""))
+        i = 1
+        for a in machine.alphabet:
+            self.obTable.T[i].append(self.member_query(a))
+            i += 1
 
     def row(self, sentence):
         result = []
@@ -91,6 +97,7 @@ class Student:
         return True
 
     def close(self):
+        print("闭合观察表")
         for s in self.obTable.S:
             for char in self.obTable.alphabet:
                 for s2 in range(len(self.obTable.S)):
@@ -148,30 +155,102 @@ class Student:
                 self.consist()
 
     # 状态的归纳，返回状态数量、每一列对应的状态列表和接受状态列表
-    def count_state(self):
+    def count_state(self, conflict_list: list) -> Tuple[int, list, list, list]:
         counter = 1
         state_list = [0]
         accepted = []
         total = len(self.obTable.S)
+        states_of_s = [[0]]
         if self.member_query(self.obTable.S[0])[0] == 1:
             accepted.append(0)
         for i in range(1, total):
             new_state = True
-            for j in range(i):
-                if is_same_state(self.row(self.obTable.S[i]), self.row(self.obTable.S[j]), True):
-                    state_list.append(state_list[j])
+            for j in range(len(states_of_s)):
+                is_compatible = True
+                for s in states_of_s[j]:
+                    if conflict_list:
+                        if i in conflict_list[s]:
+                            is_compatible = False
+                            break
+                    if is_same_state(self.row(self.obTable.S[i]), self.row(self.obTable.S[s]), True):
+                        pass
+                    else:
+                        is_compatible = False
+                        break
+                if is_compatible:
+                    state_list.append(j)
+                    states_of_s[j].append(i)
                     new_state = False
                     break
+            # for j in range(i):
+            #     if is_same_state(self.row(self.obTable.S[i]), self.row(self.obTable.S[j]), True):
+            #         state_list.append(state_list[j])
+            #         new_state = False
+            #         break
             if new_state:
                 state_list.append(counter)
+                states_of_s.append([i])
                 counter = counter + 1
                 if self.member_query(self.obTable.S[i])[0] == 1:
                     accepted.append(counter - 1)
-        return counter, state_list, accepted
+        return counter, state_list, accepted, states_of_s
+
+    # 检查两列S的下一状态转移有没有数值重叠且转移目标和参数改变不同
+    def find_conflict(self, state_list, states_of_s) -> Tuple[bool, list]:
+        conflict_list = [[] for i in range(len(state_list))]
+        has_conflict = False
+        for state in states_of_s:
+            for i in range(len(state)):
+                for j in range(i + 1, len(state)):
+                    s1 = self.obTable.S[state[i]]
+                    s2 = self.obTable.S[state[j]]
+                    # 同一状态的两个s，如果参数相等，则比较每个输入下转移是否相同
+                    y1, n1 = self.member_query(s1)
+                    y2, n2 = self.member_query(s2)
+                    if n1 == n2:
+                        for char in self.obTable.alphabet:
+                            sentence1 = s1 + char
+                            sentence2 = s2 + char
+                            if sentence1 not in self.obTable.S or sentence2 not in self.obTable.S:
+                                continue
+                            target_state_1 = state_list[self.obTable.S.index(sentence1)]
+                            target_state_2 = state_list[self.obTable.S.index(sentence2)]
+                            n, opt1, opt_num1 = self.teacher.full_query(sentence1)
+                            n, opt2, opt_num2 = self.teacher.full_query(sentence2)
+                            if target_state_1 != target_state_2 or opt1 != opt2 or opt_num1 != opt_num2:
+                                conflict_list[state[i]].append(state[j])
+                                conflict_list[state[j]].append(state[i])
+                                has_conflict = True
+                                break
+        return has_conflict, conflict_list
+
+    def do_count_state(self):
+        conflict_list = [[] for i in range(len(self.obTable.S))]
+        while(True):
+            counter, state_list, accepted, states_of_s = self.count_state(conflict_list)
+            has_conflict, new_conflict_list = self.find_conflict(state_list, states_of_s)
+            if not has_conflict:
+                return counter, state_list, accepted
+            print("状态有冲突：")
+            for i in range(len(conflict_list)):
+                conflict_list[i] += new_conflict_list[i]
+            print(conflict_list)
 
     # 构造dfa
     def build_dfa(self):
-        state_num, state_list, accepted = self.count_state()
+        temp_r = []
+        temp_t = []
+        for s in self.obTable.S:
+            for char in self.obTable.alphabet:
+                if s + char not in self.obTable.S:
+                    temp_r.append(s + char)
+                    temp_t.append([self.row(s + char)])
+                    print("添加R：", s + char)
+
+        self.obTable.S += temp_r
+        self.obTable.T += temp_t
+
+        state_num, state_list, accepted = self.do_count_state()
         print(self.obTable.S)
         print("状态：")
         print(state_list, accepted)
@@ -195,6 +274,8 @@ class Student:
                 target_state = state_list[self.obTable.S.index(sentence)]
                 n, opt, opt_num = self.teacher.full_query(sentence)
                 self.learning_machine.update_once(current_state, char, Trans(n, n, target_state, opt, opt_num))
+        self.obTable.S = [i for i in self.obTable.S if i not in temp_r]
+        self.obTable.T = [i for i in self.obTable.T if i not in temp_t]
 
     def learn(self):
         while True:
@@ -215,3 +296,9 @@ class Student:
                     self.obTable.S.append(example[x:])
                     self.obTable.T.append(self.row(example[x:]))
                     print("添加S：", example[x:])
+                for x in range(len(example)):
+                    if example[:x] in self.obTable.S:
+                        continue
+                    self.obTable.S.append(example[:x])
+                    self.obTable.T.append(self.row(example[:x]))
+                    print("添加S：", example[:x])
