@@ -1,9 +1,9 @@
 from typing import Tuple
 
-from automaton import Machine, Trans
-from observationTable import ObservationTable, is_same_state
+from algorithm_v1.automaton import Machine, Trans
+from algorithm_v1.observationTable import ObservationTable, is_same_state
 varMax = 10
-lenMax = 10
+lenMax = 7
 
 
 class Teacher:
@@ -87,6 +87,8 @@ class Student:
         for s1 in self.obTable.S:
             for s2 in self.obTable.S:
                 if is_same_state(self.row(s1), self.row(s2), True):
+                    if len(s1) >= lenMax - 1 or len(s2) >= lenMax - 1:
+                        continue
                     if self.member_query(s1)[1] != self.member_query(s2)[1]:
                         # 变量值不同，跳过不比较
                         continue
@@ -115,14 +117,20 @@ class Student:
                 if s == s2:
                     continue
                 if is_same_state(self.row(s), self.row(s2), True):
-                    print(s, " = ", s2)
+                    if len(s) >= lenMax or len(s2) >= lenMax:
+                        continue
+                    # print(s, " = ", s2)
                     if self.member_query(s)[1] != self.member_query(s2)[1]:
                         # 变量值不同，跳过不比较
                         continue
                     for char in self.obTable.alphabet:
                         for e in self.obTable.E:
+                            if len(s + char + e) > lenMax or len(s2 + char + e) > lenMax:
+                                continue
                             if not is_same_state(self.row(s + char + e), self.row(s2 + char + e)):
-                                print(s + char + e, " != ", s2 + char + e)
+                                if char + e in self.obTable.E:
+                                    continue
+                                # print(s + char + e, " != ", s2 + char + e)
                                 print(self.row(s + char + e), self.row(s2 + char + e))
                                 self.obTable.E.append(char + e)
                                 print("添加E：", char + e)
@@ -231,10 +239,10 @@ class Student:
             has_conflict, new_conflict_list = self.find_conflict(state_list, states_of_s)
             if not has_conflict:
                 return counter, state_list, accepted
-            print("状态有冲突：")
+            # print("状态有冲突：")
             for i in range(len(conflict_list)):
                 conflict_list[i] += new_conflict_list[i]
-            print(conflict_list)
+            # print(conflict_list)
 
     # 构造dfa
     def build_dfa(self):
@@ -245,7 +253,7 @@ class Student:
                 if s + char not in self.obTable.S:
                     temp_r.append(s + char)
                     temp_t.append([self.row(s + char)])
-                    print("添加R：", s + char)
+                    # print("添加R：", s + char)
 
         self.obTable.S += temp_r
         self.obTable.T += temp_t
@@ -277,7 +285,7 @@ class Student:
         self.obTable.S = [i for i in self.obTable.S if i not in temp_r]
         self.obTable.T = [i for i in self.obTable.T if i not in temp_t]
 
-    def learn(self):
+    def learn(self) -> Machine:
         while True:
             self.close_and_consist()
             self.build_dfa()
@@ -288,7 +296,7 @@ class Student:
             print("accept:")
             print(self.learning_machine.accepted)
             if is_equal:
-                return
+                return self.learning_machine
             else:
                 for x in range(len(example)):
                     if example[x:] in self.obTable.S:

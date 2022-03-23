@@ -29,7 +29,7 @@ class Machine:
 
     # update传入的Trans左右区间为同一个数
     def update_once(self, state, char, new_trans: Trans):
-        print("update dfa: ", state, char, new_trans)
+        # print("update dfa: ", state, char, new_trans)
         trans_region = new_trans.left
         for trans in self.dfa[state][char]:
             # 发现重叠的情况
