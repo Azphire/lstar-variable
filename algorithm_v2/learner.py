@@ -76,7 +76,7 @@ class Student:
         for s in self.obTable.S:
             for char in self.obTable.alphabet:
                 for s2 in range(len(self.obTable.S)):
-                    if is_same_state(self.row(s + char), self.row(self.obTable.S[s2])):
+                    if is_same_state(self.row(s + char), self.row(self.obTable.S[s2])) == 1:
                         break
                     if s2 == len(self.obTable.S) - 1:
                         return False
@@ -86,14 +86,14 @@ class Student:
     def is_consistent(self):
         for s1 in self.obTable.S:
             for s2 in self.obTable.S:
-                if is_same_state(self.row(s1), self.row(s2), True):
+                if is_same_state(self.row(s1), self.row(s2), True) == 1:
                     if len(s1) >= lenMax - 1 or len(s2) >= lenMax - 1:
                         continue
                     if self.member_query(s1)[1] != self.member_query(s2)[1]:
                         # 变量值不同，跳过不比较
                         continue
                     for char in self.obTable.alphabet:
-                        if not is_same_state(self.row(s1 + char), self.row(s2 + char)):
+                        if not is_same_state(self.row(s1 + char), self.row(s2 + char)) == 1:
                             return False
         print("已完备")
         return True
@@ -103,7 +103,7 @@ class Student:
         for s in self.obTable.S:
             for char in self.obTable.alphabet:
                 for s2 in range(len(self.obTable.S)):
-                    if is_same_state(self.row(s + char), self.row(self.obTable.S[s2]), True):
+                    if is_same_state(self.row(s + char), self.row(self.obTable.S[s2]), True) == 1:
                         break
                     if s2 == len(self.obTable.S) - 1:
                         self.obTable.S.append(s + char)
@@ -116,7 +116,7 @@ class Student:
             for s2 in self.obTable.S:
                 if s == s2:
                     continue
-                if is_same_state(self.row(s), self.row(s2), True):
+                if is_same_state(self.row(s), self.row(s2), True) == 1:
                     if len(s) >= lenMax or len(s2) >= lenMax:
                         continue
                     # print(s, " = ", s2)
@@ -127,7 +127,7 @@ class Student:
                         for e in self.obTable.E:
                             if len(s + char + e) > lenMax or len(s2 + char + e) > lenMax:
                                 continue
-                            if not is_same_state(self.row(s + char + e), self.row(s2 + char + e)):
+                            if not is_same_state(self.row(s + char + e), self.row(s2 + char + e)) == 1:
                                 if char + e in self.obTable.E:
                                     continue
                                 # print(s + char + e, " != ", s2 + char + e)
