@@ -1,7 +1,7 @@
 from typing import Tuple
 
-from algorithm_v1.automaton import Machine, Trans
-from algorithm_v1.observationTable import ObservationTable, is_same_state
+from algorithm_v2.automaton import Machine, Trans
+from algorithm_v2.observationTable import ObservationTable, is_same_state
 varMax = 10
 lenMax = 7
 
@@ -298,12 +298,12 @@ class Student:
             if is_equal:
                 return self.learning_machine
             else:
-                for x in range(len(example)):
-                    if example[x:] in self.obTable.S:
-                        continue
-                    self.obTable.S.append(example[x:])
-                    self.obTable.T.append(self.row(example[x:]))
-                    print("添加S：", example[x:])
+                # for x in range(len(example)):
+                #     if example[x:] in self.obTable.S:
+                #         continue
+                #     self.obTable.S.append(example[x:])
+                #     self.obTable.T.append(self.row(example[x:]))
+                #     print("添加S：", example[x:])
                 for x in range(len(example)):
                     if example[:x] in self.obTable.S:
                         continue

@@ -5,7 +5,7 @@ from typing import Tuple
 
 from algorithm_v1.automaton import Machine, Trans
 
-VarMax = 10
+VarMax = 5
 LenMax = 7
 
 Alphabet = ['a', 'b']

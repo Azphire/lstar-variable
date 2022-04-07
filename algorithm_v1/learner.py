@@ -2,7 +2,7 @@ from typing import Tuple
 
 from algorithm_v1.automaton import Machine, Trans
 from algorithm_v1.observationTable import ObservationTable, is_same_state
-varMax = 10
+varMax = 5
 lenMax = 7
 
 
@@ -86,6 +86,8 @@ class Student:
     def is_consistent(self):
         for s1 in self.obTable.S:
             for s2 in self.obTable.S:
+                if s1 == s2:
+                    continue
                 if is_same_state(self.row(s1), self.row(s2), True):
                     if len(s1) >= lenMax - 1 or len(s2) >= lenMax - 1:
                         continue

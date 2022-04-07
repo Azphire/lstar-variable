@@ -63,15 +63,22 @@ machine_4 = Machine(alphabet_3, [1, 2, 3], dfa_4, 1, [2])
 if __name__ == '__main__':
     # student = Student(machine_4)
 
-    for i in range(10):
-        m, fn = random_dfa(["a", "b"], 4)
-        print(fn)
-        student = Student(m)
-        result = student.learn()
-        store_machine(result, fn + 'learn.json')
+    # for i in range(10):
+    #     m, fn = random_dfa(["a", "b"], 4)
+    #     print(fn)
+    #     student = Student(m)
+    #     result = student.learn()
+    #     store_machine(result, fn + 'learn.json')
 
-    # fn = './dfa/20220322215313'
+    m, fn = random_dfa(["a", "b"], 4)
+    print(fn)
+    student = Student(m)
+    result = student.learn()
+    store_machine(result, fn + 'learn.json')
+
+    # fn = './dfa/20220324134530'
     # m = fetch_dfa(fn + '.json')
     # student = Student(m)
     # result = student.learn()
     # store_machine(result, fn + 'learn.json')
+
