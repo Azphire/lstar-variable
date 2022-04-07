@@ -6,7 +6,7 @@ from typing import Tuple
 from algorithm_v1.automaton import Machine, Trans
 
 VarMax = 5
-LenMax = 7
+LenMax = 20
 
 Alphabet = ['a', 'b']
 StateNumber = 4
@@ -49,16 +49,18 @@ def random_dfa(alphabet: list, state_number: int) -> Tuple[Machine, str]:
             left = 0
             right = 0
             while True:
-                right += random.randint(0, VarMax - right)
+                # right += random.randint(0, VarMax - right)
                 target = random.choice(states)
                 if right >= VarMax or random.randint(0, 2) == 0:
                     trans_list.append(Trans(left, right, target, "=", random.randint(0, VarMax)))
                 else:
-                    trans_list.append(Trans(left, right, target, "+", 1))
+                    trans_list.append(Trans(left, right, target, "#", 0))
                 if right >= VarMax:
                     break
-                left = right + 1
-                right = left
+                # left = right + 1
+                # right = left
+                left += 1
+                right += 1
             dfa_map[i][char] = trans_list
     print(dfa_map)
     store = {

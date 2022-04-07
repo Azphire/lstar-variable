@@ -2,8 +2,9 @@ from typing import Tuple
 
 from algorithm_v1.automaton import Machine, Trans
 from algorithm_v1.observationTable import ObservationTable, is_same_state
+from algorithm_v1.equivalenceQuery import EquivalenceQuery
 varMax = 5
-lenMax = 7
+lenMax = 20
 
 
 class Teacher:
@@ -291,7 +292,12 @@ class Student:
         while True:
             self.close_and_consist()
             self.build_dfa()
-            is_equal, example = self.teacher.eq_query(self.learning_machine)
+            # is_equal, example = self.teacher.eq_query(self.learning_machine)
+            is_equal, example = EquivalenceQuery(self.teacher.machine, self.learning_machine).query()
+            if is_equal:
+                print("等价")
+            else:
+                print("不等价，反例：", example)
             print("构建结果：")
             print("dfa:")
             print(self.learning_machine.dfa)
