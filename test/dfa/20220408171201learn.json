@@ -1,0 +1,1 @@
+{"alphabet": ["a", "b"], "states": [0], "dfa": {"0": {"a": [{"l": 0, "r": 3, "target": 0, "opt": "#", "num": 0}], "b": [{"l": 0, "r": 3, "target": 0, "opt": "#", "num": 0}]}}, "accepted": [], "start": 0}

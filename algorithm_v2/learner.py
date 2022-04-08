@@ -110,7 +110,7 @@ class Student:
                         break
                     if s2 == len(self.obTable.S) - 1:
                         self.obTable.S.append(s + char)
-                        self.obTable.T.append([self.row(s + char)])
+                        self.obTable.T.append(self.row(s + char))
                         print("添加S：", s + char)
 
     def consist(self):
@@ -209,7 +209,7 @@ class Student:
             for char in self.obTable.alphabet:
                 if s + char not in self.obTable.S:
                     temp_r.append(s + char)
-                    temp_t.append([self.row(s + char)])
+                    temp_t.append(self.row(s + char))
                     # print("添加R：", s + char)
 
         self.obTable.S += temp_r
