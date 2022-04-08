@@ -261,12 +261,6 @@ class Student:
                 return self.learning_machine
             else:
                 for x in range(len(example)):
-                    if example[x:] in self.obTable.S:
-                        continue
-                    self.obTable.S.append(example[x:])
-                    self.obTable.T.append(self.row(example[x:]))
-                    print("添加S：", example[x:])
-                for x in range(len(example)):
                     if example[:x] in self.obTable.S:
                         continue
                     self.obTable.S.append(example[:x])
