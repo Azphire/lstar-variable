@@ -126,10 +126,10 @@ class Student:
                     if self.member_query(s)[1] != self.member_query(s2)[1]:
                         # 变量值不同，跳过不比较
                         continue
-                    new_add_e = False
+                    new_add_e = []
                     for char in self.obTable.alphabet:
                         for e in self.obTable.E:
-                            if e == new_add_e:
+                            if e in new_add_e:
                                 continue
                             if len(s + char + e) > lenMax or len(s2 + char + e) > lenMax:
                                 continue
@@ -140,7 +140,7 @@ class Student:
                                 print(self.row(s + char + e), self.row(s2 + char + e))
                                 self.obTable.E.append(char + e)
                                 print("添加E：", char + e)
-                                new_add_e = char + e
+                                new_add_e.append(char + e)
                                 for ind in range(len(self.obTable.S)):
                                     self.obTable.T[ind].append(self.member_query(self.obTable.S[ind] + char + e))
 

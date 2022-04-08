@@ -1,20 +1,22 @@
-def is_same_state(row_1: list, row_2: list, strict=False):
-    if strict and row_1[0][0] != row_2[0][0]:
-        return 0
-    if row_1[0][1] != row_2[0][1]:
-        return 2
-    for i in range(len(row_1)):
-        if row_1[i][1] == row_2[i][1] and row_1[i][0] != row_2[i][0]:
-            return 0
-    return 1
 
-# def is_same_state(row_1: list, row_2: list, strict=False):
-#     if strict and row_1[0][0] != row_2[0][0]:
-#         return False
-#     for i in range(len(row_1)):
-#         if row_1[i][1] == row_2[i][1] and row_1[i][0] != row_2[i][0]:
-#             return False
-#     return True
+def is_same_state(row_1: list, row_2: list):
+    if row_1[0][1] != row_2[0][1]:
+        return False
+    for i in range(len(row_1)):
+        if row_1[i][0] != row_2[i][0]:
+            return False
+    return True
+
+
+def no_conflict(row_1: list, row_2: list):
+    if row_1[0][0] != row_2[0][0]:
+        return False
+    if row_1[0][1] != row_2[0][1]:
+        return True
+    for i in range(len(row_1)):
+        if row_1[i][0] != row_2[i][0]:
+            return False
+    return True
 
 
 class ObservationTable:
