@@ -67,7 +67,7 @@ if __name__ == '__main__':
     result = student.learn()
     store_machine(result, fn + 'learn.json')
 
-    # fn = './dfa/20220324134530'
+    # fn = './dfa/20220408134257'
     # m = fetch_dfa(fn + '.json')
     # student = Student(m)
     # result = student.learn()

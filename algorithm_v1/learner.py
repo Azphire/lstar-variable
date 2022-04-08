@@ -1,10 +1,10 @@
 from typing import Tuple
 
 from algorithm_v1.automaton import Machine, Trans
-from algorithm_v1.observationTable import ObservationTable, is_same_state
+from algorithm_v1.observationTable import ObservationTable, is_same_state, no_conflict
 from algorithm_v1.equivalenceQuery import EquivalenceQuery
-varMax = 5
-lenMax = 20
+varMax = 3
+lenMax = 100
 
 
 class Teacher:
@@ -89,7 +89,7 @@ class Student:
             for s2 in self.obTable.S:
                 if s1 == s2:
                     continue
-                if is_same_state(self.row(s1), self.row(s2), True):
+                if is_same_state(self.row(s1), self.row(s2)):
                     if len(s1) >= lenMax - 1 or len(s2) >= lenMax - 1:
                         continue
                     if self.member_query(s1)[1] != self.member_query(s2)[1]:
@@ -106,7 +106,7 @@ class Student:
         for s in self.obTable.S:
             for char in self.obTable.alphabet:
                 for s2 in range(len(self.obTable.S)):
-                    if is_same_state(self.row(s + char), self.row(self.obTable.S[s2]), True):
+                    if is_same_state(self.row(s + char), self.row(self.obTable.S[s2])):
                         break
                     if s2 == len(self.obTable.S) - 1:
                         self.obTable.S.append(s + char)
@@ -119,15 +119,18 @@ class Student:
             for s2 in self.obTable.S:
                 if s == s2:
                     continue
-                if is_same_state(self.row(s), self.row(s2), True):
+                if is_same_state(self.row(s), self.row(s2)):
                     if len(s) >= lenMax or len(s2) >= lenMax:
                         continue
                     # print(s, " = ", s2)
                     if self.member_query(s)[1] != self.member_query(s2)[1]:
                         # 变量值不同，跳过不比较
                         continue
+                    new_add_e = False
                     for char in self.obTable.alphabet:
                         for e in self.obTable.E:
+                            if e == new_add_e:
+                                continue
                             if len(s + char + e) > lenMax or len(s2 + char + e) > lenMax:
                                 continue
                             if not is_same_state(self.row(s + char + e), self.row(s2 + char + e)):
@@ -137,6 +140,7 @@ class Student:
                                 print(self.row(s + char + e), self.row(s2 + char + e))
                                 self.obTable.E.append(char + e)
                                 print("添加E：", char + e)
+                                new_add_e = char + e
                                 for ind in range(len(self.obTable.S)):
                                     self.obTable.T[ind].append(self.member_query(self.obTable.S[ind] + char + e))
 
@@ -183,7 +187,7 @@ class Student:
                         if i in conflict_list[s]:
                             is_compatible = False
                             break
-                    if is_same_state(self.row(self.obTable.S[i]), self.row(self.obTable.S[s]), True):
+                    if no_conflict(self.row(self.obTable.S[i]), self.row(self.obTable.S[s])):
                         pass
                     else:
                         is_compatible = False
@@ -285,8 +289,8 @@ class Student:
                 target_state = state_list[self.obTable.S.index(sentence)]
                 n, opt, opt_num = self.teacher.full_query(sentence)
                 self.learning_machine.update_once(current_state, char, Trans(n, n, target_state, opt, opt_num))
-        self.obTable.S = [i for i in self.obTable.S if i not in temp_r]
-        self.obTable.T = [i for i in self.obTable.T if i not in temp_t]
+        self.obTable.S = self.obTable.S[:(len(self.obTable.S) - len(temp_r))]
+        self.obTable.T = self.obTable.T[:(len(self.obTable.T) - len(temp_t))]
 
     def learn(self) -> Machine:
         while True:

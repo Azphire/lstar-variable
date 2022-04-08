@@ -1,7 +1,7 @@
 from algorithm_v1.equivalenceQuery import EquivalenceQuery
 from algorithm_v1.automaton import Machine, Trans
 from test.randomDFA import fetch_dfa, store_machine
-varMax = 5
+varMax = 3
 
 alphabet_1 = ["a", "b"]
 states_1 = [1, 2]
