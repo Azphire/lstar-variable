@@ -22,7 +22,7 @@ if __name__ == '__main__':
         time2 += time.time() - t
 
         store_machine(result0, fn + 'learn0.json')
-        store_machine(result0, fn + 'learn2.json')
+        store_machine(result2, fn + 'learn2.json')
 
     print("time0: ", time0)
     print("time2: ", time2)
