@@ -3,7 +3,7 @@ from typing import Tuple
 from algorithm_v1.automaton import Machine, Trans
 from algorithm_v1.observationTable import ObservationTable, is_same_state, no_conflict
 from algorithm_v1.equivalenceQuery import EquivalenceQuery
-varMax = 5
+varMax = 3
 lenMax = 100
 
 
@@ -181,14 +181,14 @@ class Student:
         for i in range(1, total):
             new_state = True
             for j in range(len(states_of_s)):
-                is_compatible = True
+                is_same = True
                 for s in states_of_s[j]:
-                    if no_conflict(self.row(self.obTable.S[i]), self.row(self.obTable.S[s])):
+                    if is_same_state(self.row(self.obTable.S[i]), self.row(self.obTable.S[s])):
                         pass
                     else:
-                        is_compatible = False
+                        is_same = False
                         break
-                if is_compatible:
+                if is_same:
                     state_list.append(j)
                     states_of_s[j].append(i)
                     new_state = False
