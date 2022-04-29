@@ -4,7 +4,7 @@ from algorithm_v1.automaton import Machine, Trans
 from algorithm_v1.observationTable import ObservationTable, is_same_state, no_conflict
 from algorithm_v1.equivalenceQuery import EquivalenceQuery
 varMax = 3
-lenMax = 100
+lenMax = 1000000
 
 
 class Teacher:
@@ -64,6 +64,8 @@ class Student:
             i += 1
 
     def row(self, sentence):
+        if sentence in self.obTable.S:
+            return self.obTable.T[self.obTable.S.index(sentence)]
         result = []
         for e in self.obTable.E:
             result.append(self.member_query(sentence + e))
@@ -109,8 +111,8 @@ class Student:
                     if is_same_state(self.row(s + char), self.row(self.obTable.S[s2])):
                         break
                     if s2 == len(self.obTable.S) - 1:
-                        self.obTable.S.append(s + char)
                         self.obTable.T.append(self.row(s + char))
+                        self.obTable.S.append(s + char)
                         print("添加S：", s + char)
 
     def consist(self):
@@ -263,6 +265,6 @@ class Student:
                 for x in range(len(example)):
                     if example[:x] in self.obTable.S:
                         continue
-                    self.obTable.S.append(example[:x])
                     self.obTable.T.append(self.row(example[:x]))
+                    self.obTable.S.append(example[:x])
                     print("添加S：", example[:x])
