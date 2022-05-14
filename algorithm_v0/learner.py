@@ -3,7 +3,7 @@ from typing import Tuple
 from algorithm_v1.automaton import Machine, Trans
 from algorithm_v1.observationTable import ObservationTable, is_same_state, no_conflict
 from algorithm_v1.equivalenceQuery import EquivalenceQuery
-varMax = 3
+varMax = 7
 lenMax = 1000000
 
 

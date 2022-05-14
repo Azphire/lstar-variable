@@ -31,23 +31,34 @@ class Machine:
     def update_once(self, state, char, new_trans: Trans):
         # print("update dfa: ", state, char, new_trans)
         trans_region = new_trans.left
+        covered = False
         for trans in self.dfa[state][char]:
-            # 发现重叠的情况
+
             if trans.left <= trans_region <= trans.right:
-                # 转换相同
-                if trans.target == new_trans.target and \
-                        trans.operator == new_trans.operator and \
-                        trans.opt_number == new_trans.opt_number:
+                if trans.target != new_trans.target or \
+                        trans.operator != new_trans.operator or \
+                        trans.opt_number != new_trans.opt_number:
+                    print('转换冲突！')
                     return 0
-                right_trans = Trans(new_trans.right + 1, trans.right, trans.target, trans.operator, trans.opt_number)
-                left_trans = Trans(trans.left, new_trans.left - 1, trans.target, trans.operator, trans.opt_number)
-                self.dfa[state][char].remove(trans)
-                if right_trans.left <= right_trans.right:
-                    self.dfa[state][char].append(right_trans)
-                if left_trans.left <= left_trans.right:
+
+            if trans.target == new_trans.target and \
+                    trans.operator == new_trans.operator and \
+                    trans.opt_number == new_trans.opt_number:
+
+                if trans.left == trans_region + 1:
+                    left_trans = Trans(trans.left - 1, trans.right, trans.target, trans.operator, trans.opt_number)
+                    self.dfa[state][char].remove(trans)
                     self.dfa[state][char].append(left_trans)
-                break
-        self.dfa[state][char].append(new_trans)
+                    covered = True
+
+                if trans.right == trans_region - 1:
+                    right_trans = Trans(trans.left, trans.right + 1, trans.target, trans.operator, trans.opt_number)
+                    self.dfa[state][char].remove(trans)
+                    self.dfa[state][char].append(right_trans)
+                    covered = True
+
+        if not covered:
+            self.dfa[state][char].append(new_trans)
 
     def transfer(self, state, char, n):
         selected_trans = None
@@ -68,7 +79,7 @@ class Machine:
                 elif selected_trans.operator == "=":
                     cur_n = selected_trans.opt_number
                 return selected_trans.target, cur_n, selected_trans.operator, selected_trans.opt_number
-        return None
+        return state, n, '#', 0
 
     def member_query(self, test_str):
         if test_str == "":

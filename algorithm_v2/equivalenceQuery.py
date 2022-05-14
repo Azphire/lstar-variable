@@ -1,7 +1,7 @@
 import copy
 from typing import Tuple
 
-from algorithm_v1.automaton import Machine, Trans
+from algorithm_v2.automaton import Machine, Trans
 
 varMax = 5
 

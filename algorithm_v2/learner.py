@@ -1,9 +1,9 @@
 from typing import Tuple
 
-from algorithm_v1.automaton import Machine, Trans
-from algorithm_v1.observationTable import ObservationTable, is_same_state, no_conflict
-from algorithm_v1.equivalenceQuery import EquivalenceQuery
-varMax = 5
+from algorithm_v2.automaton import Machine, Trans
+from algorithm_v2.observationTable import ObservationTable, is_same_state, no_conflict
+from algorithm_v2.equivalenceQuery import EquivalenceQuery
+varMax = 3
 lenMax = 1000000
 
 
@@ -65,10 +65,14 @@ class Student:
 
     def row(self, sentence):
         if sentence in self.obTable.S:
-            return self.obTable.T[self.obTable.S.index(sentence)]
+            return self.obTable.T[self.obTable.S.index(sentence)][:]
+        if sentence in self.obTable.R:
+            return self.obTable.RT[self.obTable.R.index(sentence)][:]
         result = []
         for e in self.obTable.E:
             result.append(self.member_query(sentence + e))
+        self.obTable.R.append(sentence)
+        self.obTable.RT.append(result)
         return result
 
     # 返回该句子的接受与否和参数值
@@ -83,6 +87,11 @@ class Student:
                         break
                     if s2 == len(self.obTable.S) - 1:
                         return False
+        for s in self.obTable.S:
+            if s in self.obTable.R:
+                del self.obTable.RT[self.obTable.R.index(s)]
+                self.obTable.R.remove(s)
+
         print("已闭合")
         return True
 
@@ -92,11 +101,6 @@ class Student:
                 if s1 == s2:
                     continue
                 if is_same_state(self.row(s1), self.row(s2)):
-                    if len(s1) >= lenMax - 1 or len(s2) >= lenMax - 1:
-                        continue
-                    if self.member_query(s1)[1] != self.member_query(s2)[1]:
-                        # 变量值不同，跳过不比较
-                        continue
                     for char in self.obTable.alphabet:
                         if not is_same_state(self.row(s1 + char), self.row(s2 + char)):
                             return False
@@ -115,6 +119,10 @@ class Student:
                         self.obTable.S.append(s + char)
                         print("添加S：", s + char)
 
+                        if s + char in self.obTable.R:
+                            del self.obTable.RT[self.obTable.R.index(s + char)]
+                            self.obTable.R.remove(s + char)
+
     def consist(self):
         print("完备观察表")
         for s in self.obTable.S:
@@ -122,29 +130,25 @@ class Student:
                 if s == s2:
                     continue
                 if is_same_state(self.row(s), self.row(s2)):
-                    if len(s) >= lenMax or len(s2) >= lenMax:
-                        continue
-                    # print(s, " = ", s2)
-                    if self.member_query(s)[1] != self.member_query(s2)[1]:
-                        # 变量值不同，跳过不比较
-                        continue
                     new_add_e = []
                     for char in self.obTable.alphabet:
                         for e in self.obTable.E:
                             if e in new_add_e:
                                 continue
-                            if len(s + char + e) > lenMax or len(s2 + char + e) > lenMax:
-                                continue
                             if not is_same_state(self.row(s + char + e), self.row(s2 + char + e)):
                                 if char + e in self.obTable.E:
                                     continue
                                 # print(s + char + e, " != ", s2 + char + e)
-                                print(self.row(s + char + e), self.row(s2 + char + e))
+                                # print(self.row(s + char + e), self.row(s2 + char + e))
                                 self.obTable.E.append(char + e)
                                 print("添加E：", char + e)
                                 new_add_e.append(char + e)
                                 for ind in range(len(self.obTable.S)):
-                                    self.obTable.T[ind].append(self.member_query(self.obTable.S[ind] + char + e))
+                                    member = self.member_query(self.obTable.S[ind] + char + e)
+                                    self.obTable.T[ind].append(member)
+                                for ind in range(len(self.obTable.R)):
+                                    member = self.member_query(self.obTable.R[ind] + char + e)
+                                    self.obTable.RT[ind].append(member)
 
     # 进行闭合和完备观察表的操作
     def close_and_consist(self):
@@ -178,7 +182,7 @@ class Student:
         accepted = []
         total = len(self.obTable.S)
         states_of_s = [[0]]
-        if self.member_query(self.obTable.S[0])[0] == 1:
+        if self.obTable.T[0][0][0] == 1:
             accepted.append(0)
         for i in range(1, total):
             new_state = True
@@ -199,7 +203,7 @@ class Student:
                 state_list.append(counter)
                 states_of_s.append([i])
                 counter = counter + 1
-                if self.member_query(self.obTable.S[i])[0] == 1:
+                if self.obTable.T[i][0][0] == 1:
                     accepted.append(counter - 1)
         return counter, state_list, accepted
 
@@ -228,7 +232,8 @@ class Student:
             dfa_states.append(i)
             dfa_map[i] = {}
             for char in self.teacher.alphabet:
-                dfa_map[i][char] = [Trans(0, varMax, i, "#", 0)]
+                # dfa_map[i][char] = [Trans(0, varMax, i, "#", 0)]
+                dfa_map[i][char] = []
         self.learning_machine = Machine(self.teacher.alphabet, dfa_states, dfa_map, 0, accepted)
         # 遍历每一列S，更新dfa
         for i in range(len(self.obTable.S)):
@@ -239,8 +244,10 @@ class Student:
                 if sentence not in self.obTable.S:
                     continue
                 target_state = state_list[self.obTable.S.index(sentence)]
-                n, opt, opt_num = self.teacher.full_query(sentence)
-                self.learning_machine.update_once(current_state, char, Trans(n, n, target_state, opt, opt_num))
+                n = self.obTable.T[self.obTable.S.index(s)][0][1]
+                opt_num = self.obTable.T[self.obTable.S.index(sentence)][0][1]
+                self.learning_machine.update_once(current_state, char,
+                                                  Trans(n, n, target_state, "=", opt_num))
         self.obTable.S = self.obTable.S[:(len(self.obTable.S) - len(temp_r))]
         self.obTable.T = self.obTable.T[:(len(self.obTable.T) - len(temp_t))]
 
@@ -259,12 +266,17 @@ class Student:
             print(self.learning_machine.dfa)
             print("accept:")
             print(self.learning_machine.accepted)
+
             if is_equal:
                 return self.learning_machine
             else:
-                for x in range(len(example)):
+                for x in range(len(example) + 1):
                     if example[:x] in self.obTable.S:
                         continue
                     self.obTable.T.append(self.row(example[:x]))
                     self.obTable.S.append(example[:x])
                     print("添加S：", example[:x])
+
+                    if example[:x] in self.obTable.R:
+                        del self.obTable.RT[self.obTable.R.index(example[:x])]
+                        self.obTable.R.remove(example[:x])

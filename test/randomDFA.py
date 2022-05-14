@@ -3,9 +3,9 @@ import random
 import time
 from typing import Tuple
 
-from algorithm_v1.automaton import Machine, Trans
+from algorithm_v2.automaton import Machine, Trans
 
-VarMax = 5
+VarMax = 3
 LenMax = 20
 
 Alphabet = ['a', 'b']
