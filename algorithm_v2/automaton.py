@@ -45,6 +45,10 @@ class Machine:
                     trans.operator == new_trans.operator and \
                     trans.opt_number == new_trans.opt_number:
 
+                if trans.left <= trans_region <= trans.right:
+                    # 重复，不必添加
+                    return 0
+
                 if trans.left == trans_region + 1:
                     left_trans = Trans(trans.left - 1, trans.right, trans.target, trans.operator, trans.opt_number)
                     self.dfa[state][char].remove(trans)

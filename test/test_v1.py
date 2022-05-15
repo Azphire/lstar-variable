@@ -1,6 +1,7 @@
 from algorithm_v1.learner import *
 from algorithm_v1.automaton import *
 from test.randomDFA import random_dfa, fetch_dfa, store_machine
+from test.randomDFA import random_dfa, fetch_dfa, store_machine
 
 # 最简单的成功例子
 alphabet_1 = ["a", "b"]

@@ -71,6 +71,7 @@ class Student:
         result = []
         for e in self.obTable.E:
             result.append(self.member_query(sentence + e))
+        print("添加R：", sentence)
         self.obTable.R.append(sentence)
         self.obTable.RT.append(result)
         return result
@@ -222,9 +223,9 @@ class Student:
         self.obTable.T += temp_t
 
         state_num, state_list, accepted = self.count_state()
-        print(self.obTable.S)
-        print("状态：")
-        print(state_list, accepted)
+
+        # print("状态：")
+        # print(state_list, accepted)
         dfa_states = []
         dfa_map = {}
         # 初始化dfa map
@@ -261,11 +262,11 @@ class Student:
                 print("等价")
             else:
                 print("不等价，反例：", example)
-            print("构建结果：")
-            print("dfa:")
-            print(self.learning_machine.dfa)
-            print("accept:")
-            print(self.learning_machine.accepted)
+            # print("构建结果：")
+            # print("dfa:")
+            # print(self.learning_machine.dfa)
+            # print("accept:")
+            # print(self.learning_machine.accepted)
 
             if is_equal:
                 return self.learning_machine
