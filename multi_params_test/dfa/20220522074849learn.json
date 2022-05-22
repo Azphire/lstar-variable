@@ -1,0 +1,56 @@
+{
+  "alphabet": [
+    "a",
+    "b"
+  ],
+  "states": [
+    0
+  ],
+  "dfa": {
+    "0": {
+      "a": [
+        {
+          "guards": [
+            1,
+            1,
+            3,
+            1
+          ],
+          "target": 0,
+          "assignments": [
+            1,
+            1,
+            3,
+            1
+          ]
+        }
+      ],
+      "b": [
+        {
+          "guards": [
+            1,
+            1,
+            3,
+            1
+          ],
+          "target": 0,
+          "assignments": [
+            1,
+            1,
+            3,
+            1
+          ]
+        }
+      ]
+    }
+  },
+  "accepted": [],
+  "start_state": 0,
+  "init_params": [
+    1,
+    1,
+    3,
+    1
+  ],
+  "time": 0.04910421371459961
+}

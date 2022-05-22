@@ -37,29 +37,51 @@ def store_machine(machine: Machine, time_using, file_name: str):
 def random_dfa(alphabet: list, state_number: int, param_num: int) -> Tuple[Machine, str]:
     states = [i + 1 for i in range(state_number)]
     dfa_map = {}
-    trans_max = pow(varMax, param_num)
     init_p_list = []
     for i in range(param_num):
         init_p_list.append(random.randint(0, varMax))
+    param_values = []
+    for p1 in range(varMax):
+        for p2 in range(varMax):
+            if param_num < 2:
+                break
+            for p3 in range(varMax):
+                if param_num < 3:
+                    break
+                for p4 in range(varMax):
+                    if param_num < 4:
+                        break
+                    for p5 in range(varMax):
+                        if param_num < 5:
+                            break
+                        for p6 in range(varMax):
+                            if param_num < 6:
+                                break
+                            param_values.append((p1, p2, p3, p4, p5, p6))
+                        if param_num == 5:
+                            param_values.append((p1, p2, p3, p4, p5))
+                    if param_num == 4:
+                        param_values.append((p1, p2, p3, p4))
+                if param_num == 3:
+                    param_values.append((p1, p2, p3))
+            if param_num == 2:
+                param_values.append((p1, p2))
+        if param_num == 1:
+            param_values.append((p1))
     init_params = tuple(init_p_list)
-    pre_params = init_params
+
     for i in states:
         dfa_map[i] = {}
         for char in alphabet:
             trans_list = []
-            for n in range(trans_max):
-                p_list = []
-                for p in range(param_num):
-                    p_list.append(random.randint(0, varMax))
-                params = tuple(p_list)
-                if random.randint(0, 10) == 0:
-                    trans_list.append(Trans(pre_params, 2, params))
-                if random.randint(0, 2) == 0:
+            for guard in param_values:
+                # if random.randint(0, 3) == 0:
+                #     trans_list.append(Trans(guard, i, guard))
+                # else:
                     target = random.choice(states)
-                    trans_list.append(Trans(pre_params, target, params))
-                else:
-                    trans_list.append(Trans(pre_params, i, params))
-                pre_params = params
+                    assignment = random.choice(param_values)
+                    trans_list.append(Trans(guard, target, assignment))
+
             dfa_map[i][char] = trans_list
     print(dfa_map)
     store = {

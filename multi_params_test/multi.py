@@ -27,7 +27,7 @@ if __name__ == '__main__':
     t = []
 
     for i in range(10):
-        m, fn = random_dfa(["a", "b"], 30, 6)
+        m, fn = random_dfa(["a", "b"], 20, 2)
         fn_list.append(fn)
 
         start_time = time.time()
@@ -43,6 +43,7 @@ if __name__ == '__main__':
         print("time: ", t[i])
 
     t.sort()
+    print('')
 
     for ti in t:
         print(ti)

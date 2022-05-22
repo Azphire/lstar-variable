@@ -1,0 +1,1 @@
+{"alphabet": ["a", "b"], "states": [0], "dfa": {"0": {"a": [{"guards": [0, 3, 2, 2, 3, 2], "target": 0, "assignments": [0, 3, 2, 2, 3, 2]}], "b": [{"guards": [0, 3, 2, 2, 3, 2], "target": 0, "assignments": [0, 3, 2, 2, 3, 2]}]}}, "accepted": [], "start_state": 0, "init_params": [0, 3, 2, 2, 3, 2], "time": 1.3986117839813232}
